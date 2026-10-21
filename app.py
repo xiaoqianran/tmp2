@@ -99,7 +99,7 @@ def index():
             ui.button("▶", on_click=lambda: ui.run_javascript("window.pdfInspector.step(1)")).props("flat")
             ui.button("适应宽度", on_click=lambda: ui.run_javascript("window.pdfInspector.fit()")).props("flat")
             ui.button("100%", on_click=lambda: ui.run_javascript("window.pdfInspector.zoom(1)")).props("flat")
-            ui.label("Ctrl+滚轮缩放 · WASD/方向键平移 · Alt+←/→ 翻页").classes("hint")
+            ui.label("Ctrl+滚轮缩放 · A/D或←/→翻页 · W/S或↑/↓滚动").classes("hint")
         with ui.row().classes("workspace gap-0"):
             ui.html('<div id="scroll-area" tabindex="0"><div id="paper"><canvas id="pdf-canvas"></canvas><div id="boxes"></div></div><div id="empty">拖拽 PDF 到窗口，或点击「打开 PDF」</div></div>', sanitize=False).classes("viewer")
             with ui.column().classes("sidebar gap-3"):
