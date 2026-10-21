@@ -155,12 +155,16 @@ function setup() {
   }, {passive:false});
   window.addEventListener('keydown', event => {
     if (!pdf || ['INPUT','TEXTAREA'].includes(document.activeElement?.tagName)) return;
-    if (event.altKey && event.key==='ArrowLeft') {event.preventDefault();go(page-1);return;}
-    if (event.altKey && event.key==='ArrowRight') {event.preventDefault();go(page+1);return;}
-    const move = {a:[-80,0],ArrowLeft:[-80,0],d:[80,0],ArrowRight:[80,0],
-                  w:[0,-80],ArrowUp:[0,-80],s:[0,80],ArrowDown:[0,80]}[event.key];
-    if (move && !event.ctrlKey && !event.altKey) {
-      event.preventDefault(); view().scrollBy({left:move[0],top:move[1]});
+    if (event.ctrlKey || event.altKey || event.metaKey) return;
+    if (event.key === 'a' || event.key === 'A' || event.key === 'ArrowLeft') {
+      event.preventDefault(); go(page - 1); return;
+    }
+    if (event.key === 'd' || event.key === 'D' || event.key === 'ArrowRight') {
+      event.preventDefault(); go(page + 1); return;
+    }
+    const dy = {w:-80,W:-80,ArrowUp:-80,s:80,S:80,ArrowDown:80}[event.key];
+    if (dy !== undefined) {
+      event.preventDefault(); view().scrollBy({top:dy});
     }
   });
 }
