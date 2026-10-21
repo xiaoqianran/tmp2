@@ -12,7 +12,7 @@ npm install
 python app.py
 ```
 
-打开 http://127.0.0.1:8788 。以后启动只需 `python app.py`。
+打开 http://127.0.0.1:8767 。以后启动只需 `python app.py`。
 
 ## 功能
 
@@ -27,3 +27,4 @@ python app.py
 这个实验仓库仅验证 NiceGUI 的开发简洁度，不改动原来的 tmp，也不实现 OCR、表格重建或字段匹配。旋转页、特殊 CropBox 的叠框坐标可能需要额外校准。第一次运行需 `npm install` 将 PDF.js 保存在本地；没有设置 CDN 退路。
 
 当前只提交了静态代码，尚未在真实 Windows 浏览器中完成自动化交互回归，不能视为已验证的稳定发布版。
+
