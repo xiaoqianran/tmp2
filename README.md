@@ -12,7 +12,7 @@ npm install
 python app.py
 ```
 
-打开 http://127.0.0.1:8766 。以后启动只需 `python app.py`。
+打开 http://127.0.0.1:8788 。以后启动只需 `python app.py`。
 
 ## 功能
 
