@@ -1,0 +1,7 @@
+{
+  "name": "tmp2-nicegui-pdf",
+  "private": true,
+  "dependencies": {
+    "pdfjs-dist": "5.4.296"
+  }
+}
