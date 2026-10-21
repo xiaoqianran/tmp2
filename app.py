@@ -111,4 +111,4 @@ def index():
                 ui.html('<input id="search" placeholder="搜索当前页文字" aria-label="搜索文字"><div id="results"></div><pre id="details">点击检测框查看文字和坐标</pre>', sanitize=False)
 
 
-ui.run(host="127.0.0.1", port=8765, reload=False, show=True, title="PDF Layout Inspector")
+ui.run(host="127.0.0.1", port=8766, reload=False, show=True, title="PDF Layout Inspector")
