@@ -18,7 +18,7 @@ python app.py
 
 - 整个窗口支持拖拽 PDF，也支持「打开 PDF」按钮；文件仅上传到本机回环地址
 - PDF.js 正常绘制 PDF 页面，pdfplumber 提取 **Text Lines** 和 **LTTextBox** 坐标并叠框
-- Ctrl+鼠标滚轮缩放、WASD/方向键滚动、Alt+左右方向键翻页
+- Ctrl+鼠标滚轮缩放；A/D 或 ←/→ 翻页；W/S 或 ↑/↓ 在当前 PDF 页面竖向滚动
 - 文字搜索、点击检测框查看文字与 bbox、适应宽度与 100% 缩放
 - 默认只监听 `127.0.0.1`，PDF 临时文件随进程退出清理
 
