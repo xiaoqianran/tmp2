@@ -1,6 +1,7 @@
 // Browser-only PDF rendering and interaction; Python handles layout extraction.
 let pdfjs, pdf, documentId, page = 1, pages = 0;
 let scale = 1.3, mode = 'lines', layout = null, generation = 0;
+let renderQueue = Promise.resolve();
 const $ = id => document.getElementById(id);
 const view = () => $('scroll-area');
 const paper = () => $('paper');
@@ -41,27 +42,34 @@ async function load(info) {
 }
 
 async function draw() {
-  if (!pdf) return;
-  const current = ++generation;
-  const p = await pdf.getPage(page);
-  const viewport = p.getViewport({scale});
-  const canvas = $('pdf-canvas');
-  const ctx = canvas.getContext('2d');
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = Math.round(viewport.width * dpr);
-  canvas.height = Math.round(viewport.height * dpr);
-  canvas.style.width = viewport.width + 'px';
-  canvas.style.height = viewport.height + 'px';
-  paper().style.width = viewport.width + 'px';
-  const rendering = p.render({canvasContext:ctx,viewport,transform:[dpr,0,0,dpr,0,0]});
-  const response = await fetch('/api/documents/'+documentId+'/pages/'+page);
-  if (!response.ok) throw Error('布局数据读取失败');
-  const result = await response.json();
-  try { await rendering.promise; } catch(error) { if (current === generation) throw error; }
-  if (current !== generation) return;
-  layout = result;
-  $('page-status').textContent = '第 '+page+' / '+pages+' 页 · '+(layout.lines?.length || 0)+' 行';
-  overlays();
+  const requested = ++generation;
+  // Serialize access to the single PDF.js canvas: no concurrent render() calls.
+  renderQueue = renderQueue.catch(() => {}).then(async () => {
+    if (!pdf || requested !== generation) return;
+    const shownPage = page;
+    const p = await pdf.getPage(shownPage);
+    if (requested !== generation) return;
+    const viewport = p.getViewport({scale});
+    const canvas = $('pdf-canvas');
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(viewport.width * dpr);
+    canvas.height = Math.round(viewport.height * dpr);
+    canvas.style.width = viewport.width + 'px';
+    canvas.style.height = viewport.height + 'px';
+    paper().style.width = viewport.width + 'px';
+    await p.render({canvasContext:ctx,viewport,transform:[dpr,0,0,dpr,0,0]}).promise;
+    if (requested !== generation) return;
+    const response = await fetch('/api/documents/'+documentId+'/pages/'+shownPage);
+    if (!response.ok) throw Error('布局数据读取失败');
+    const result = await response.json();
+    if (requested !== generation) return;
+    layout = result;
+    $('page-status').textContent = '第 '+shownPage+' / '+pages+' 页 · '+(layout.lines?.length || 0)+' 行';
+    overlays();
+    view().scrollTop = 0;
+  });
+  return renderQueue;
 }
 
 function overlays() {
@@ -103,7 +111,7 @@ function overlays() {
 async function go(next) {
   if (!pdf) return;
   page = Math.max(1, Math.min(pages, next));
-  try { await draw(); } catch(error) { status(error.message); }
+  try { await draw(); } catch(error) { console.error('PDF render failed:', error); status('渲染失败：'+error.message); }
 }
 async function fit() {
   if (!pdf) return;
@@ -154,18 +162,21 @@ function setup() {
     setZoom(scale * (event.deltaY<0 ? 1.1 : 1/1.1), event.clientX,event.clientY);
   }, {passive:false});
   window.addEventListener('keydown', event => {
-    if (!pdf || ['INPUT','TEXTAREA'].includes(document.activeElement?.tagName)) return;
-    if (event.ctrlKey || event.altKey || event.metaKey) return;
-    if (event.key === 'a' || event.key === 'A' || event.key === 'ArrowLeft') {
-      event.preventDefault(); go(page - 1); return;
+    if (!pdf || ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) return;
+    if (document.activeElement?.isContentEditable || event.ctrlKey || event.altKey || event.metaKey) return;
+    const code = event.code;
+    if (code === 'KeyA' || code === 'ArrowLeft' || code === 'KeyD' || code === 'ArrowRight') {
+      event.preventDefault();
+      event.stopPropagation();
+      go(page + (code === 'KeyA' || code === 'ArrowLeft' ? -1 : 1));
+      return;
     }
-    if (event.key === 'd' || event.key === 'D' || event.key === 'ArrowRight') {
-      event.preventDefault(); go(page + 1); return;
-    }
-    const dy = {w:-80,W:-80,ArrowUp:-80,s:80,S:80,ArrowDown:80}[event.key];
+    const dy = {KeyW:-80,ArrowUp:-80,KeyS:80,ArrowDown:80}[code];
     if (dy !== undefined) {
-      event.preventDefault(); view().scrollBy({top:dy});
+      event.preventDefault();
+      event.stopPropagation();
+      view().scrollBy({top:dy});
     }
-  });
+  }, true);
 }
 setup();
