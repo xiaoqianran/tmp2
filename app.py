@@ -90,7 +90,7 @@ def layout(identifier: str, number: int):
 @ui.page("/")
 def index():
     ui.add_head_html('<link rel="stylesheet" href="/assets/style.css">')
-    ui.add_head_html('<script type="module" src="/assets/viewer.js"></script>')
+    ui.add_head_html('<script type="module" src="/assets/viewer.js?v=3"></script>')
     with ui.column().classes("shell gap-0"):
         with ui.row().classes("toolbar items-center gap-2"):
             ui.label("PDF · Layout Inspector").classes("brand")
